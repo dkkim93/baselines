@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 
@@ -32,6 +33,11 @@ class ActionNoise(object):
     def reset(self):
         pass
 
+    def seed(self, seed):
+        # TODO dkk: Double check whether below is sufficient for seeding
+        random.seed(seed)
+        np.random.seed
+
 
 class NormalActionNoise(ActionNoise):
     def __init__(self, mu, sigma):
@@ -43,6 +49,20 @@ class NormalActionNoise(ActionNoise):
 
     def __repr__(self):
         return 'NormalActionNoise(mu={}, sigma={})'.format(self.mu, self.sigma)
+
+
+class UniformActionNoise(ActionNoise):
+    def __init__(self, low, high, size):
+        self.low = low
+        self.high = high
+        self.size = size
+
+    def __call__(self):
+        return np.random.uniform(
+            low=self.low, high=self.high, size=self.size)
+
+    def __repr__(self):
+        return 'UniformActionNoise'
 
 
 # Based on http://math.stackexchange.com/questions/1287634/implementing-ornstein-uhlenbeck-in-matlab
