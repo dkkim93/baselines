@@ -20,9 +20,10 @@ class Model(object):
 
 
 class Actor(Model):
-    def __init__(self, nb_actions, name='actor', layer_norm=True):
+    def __init__(self, nb_actions, name, config, layer_norm=True):
         super(Actor, self).__init__(name=name)
         self.nb_actions = nb_actions
+        self.config = config
         self.layer_norm = layer_norm
 
     def __call__(self, obs, reuse=False):
@@ -42,12 +43,17 @@ class Actor(Model):
             x = tf.nn.relu(x)
             
             x = tf.layers.dense(x, self.nb_actions, kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))
-            x = tf.nn.tanh(x)
+            if self.config.ddpg.activation == "tanh":
+                x = tf.nn.tanh(x)
+            elif self.config.ddpg.activation == "sigmoid":
+                x = tf.nn.sigmoid(x)
+            else:
+                raise ValueError("Invalud activation type.")
         return x
 
 
 class Critic(Model):
-    def __init__(self, name='critic', layer_norm=True):
+    def __init__(self, name, layer_norm=True):
         super(Critic, self).__init__(name=name)
         self.layer_norm = layer_norm
 

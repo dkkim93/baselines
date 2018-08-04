@@ -36,7 +36,7 @@ class ActionNoise(object):
     def seed(self, seed):
         # TODO dkk: Double check whether below is sufficient for seeding
         random.seed(seed)
-        np.random.seed
+        np.random.seed(seed)
 
 
 class NormalActionNoise(ActionNoise):

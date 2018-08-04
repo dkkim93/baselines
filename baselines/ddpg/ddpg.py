@@ -26,9 +26,9 @@ def reduce_std(x, axis=None, keepdims=False):
     return tf.sqrt(reduce_var(x, axis=axis, keepdims=keepdims))
 
 def reduce_var(x, axis=None, keepdims=False):
-    m = tf.reduce_mean(x, axis=axis, keep_dims=True)
+    m = tf.reduce_mean(x, axis=axis, keepdims=True)
     devs_squared = tf.square(x - m)
-    return tf.reduce_mean(devs_squared, axis=axis, keep_dims=keepdims)
+    return tf.reduce_mean(devs_squared, axis=axis, keepdims=keepdims)
 
 def get_target_updates(vars, target_vars, tau):
     logger.info('setting up target updates ...')
@@ -65,7 +65,8 @@ class DDPG(object):
         gamma=0.99, tau=0.001, normalize_returns=False, enable_popart=False, normalize_observations=True,
         batch_size=128, observation_range=(-5., 5.), action_range=(-1., 1.), return_range=(-np.inf, np.inf),
         adaptive_param_noise=True, adaptive_param_noise_policy_threshold=.1,
-        critic_l2_reg=0., actor_lr=1e-4, critic_lr=1e-3, clip_norm=None, reward_scale=1.):
+        critic_l2_reg=0., actor_lr=1e-4, critic_lr=1e-3, clip_norm=None, reward_scale=1.,
+        policy_type=None, i_agt=None):
         # Inputs.
         self.obs0 = tf.placeholder(tf.float32, shape=(None,) + observation_shape, name='obs0')
         self.obs1 = tf.placeholder(tf.float32, shape=(None,) + observation_shape, name='obs1')
@@ -99,7 +100,7 @@ class DDPG(object):
 
         # Observation normalization.
         if self.normalize_observations:
-            with tf.variable_scope('obs_rms'):
+            with tf.variable_scope('obs_rms_' + policy_type + str(i_agt)):
                 self.obs_rms = RunningMeanStd(shape=observation_shape)
         else:
             self.obs_rms = None
@@ -110,17 +111,18 @@ class DDPG(object):
 
         # Return normalization.
         if self.normalize_returns:
-            with tf.variable_scope('ret_rms'):
+            with tf.variable_scope('ret_rms_' + policy_type + str(i_agt)):
                 self.ret_rms = RunningMeanStd()
         else:
             self.ret_rms = None
 
         # Create target networks.
         target_actor = copy(actor)
-        target_actor.name = 'target_actor'
+        target_actor.name = 'target_actor_' + policy_type + str(i_agt)
         self.target_actor = target_actor
+
         target_critic = copy(critic)
-        target_critic.name = 'target_critic'
+        target_critic.name = 'target_critic_' + policy_type + str(i_agt)
         self.target_critic = target_critic
 
         # Create networks and core TF parts that are shared across setup parts.
