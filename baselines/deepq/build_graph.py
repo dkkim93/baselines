@@ -314,7 +314,7 @@ def build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope="deepq", 
         return act
 
 
-def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=None, gamma=1.0,
+def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=None, gamma=0.99,
     double_q=True, scope="deepq", reuse=None, param_noise=False, param_noise_filter_func=None):
     """Creates the train function:
 
