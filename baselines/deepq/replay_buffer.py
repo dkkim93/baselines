@@ -65,6 +65,7 @@ class ReplayBuffer(object):
             the end of an episode and 0 otherwise.
         """
         idxes = [random.randint(0, len(self._storage) - 1) for _ in range(batch_size)]
+        idxes[-1] = len(self._storage) - 1  # NOTE DKK: Include the most recent exp
         return self._encode_sample(idxes)
 
 
